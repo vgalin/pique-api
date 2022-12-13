@@ -7,6 +7,9 @@
 
 **Pique API** is a FastAPI-based web service for accessing and managing `Mountain Peaks`. It uses a PostGIS-enabled PostgreSQL database for storage and querying.
 
+## Disclaimer
+**Pique API** is a small example project and has no real-world use case. As such, minimal or no support will be provided.
+
 ## Prerequisites
 - Docker
 
