@@ -19,6 +19,13 @@ class Peak(BaseModel):
         orm_mode = True
 
 
+class PeakUpdate(BaseModel):
+    name: str | None = None
+    lat: float | None = None
+    lon: float | None = None
+
+
+# as-is, the following should not be in this peculiar file
 class BoxSearch(BaseModel):
     lon_min: float  # xmin
     lat_min: float  # ymin

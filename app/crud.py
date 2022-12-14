@@ -6,29 +6,14 @@ The functions allow for getting, creating, and searching for peaks.
 
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from geoalchemy2.elements import WKBElement
-from shapely import wkb
-
-from fastapi.encoders import jsonable_encoder
 
 from . import models, schemas
 
-WKB_CUSTOM_ENCODER = {WKBElement: lambda x: str(wkb.loads(str(x)))}
-# WKB* objects cannot be serialized to JSON as-is,
-# see https://github.com/tiangolo/fastapi/issues/2366
-# If not used, FastAPI crash upon returning an invalid JSON
 
 # TODO ? for the likes of f'POINT({peak.lat} {peak.lon})' => sanitize values ?
 
 
-def _custom_encode_peak(peak: models.Peak):
-    return jsonable_encoder(
-        peak,
-        custom_encoder=WKB_CUSTOM_ENCODER
-    )
-
-
-def get_peak(db: Session, peak_id: str) -> schemas.Peak:
+def get_peak(db: Session, peak_id: int) -> schemas.Peak | None:
     """
     Retrieve a peak from the database by ID.
 
@@ -36,13 +21,12 @@ def get_peak(db: Session, peak_id: str) -> schemas.Peak:
     :param peak_id: ID of the peak to retrieve
     :return: The peak object
     """
-    return _custom_encode_peak(
-        db.query(models.Peak).filter(models.Peak.id == peak_id).one()
-    )
+    return db.query(models.Peak).filter(models.Peak.id == peak_id).first()
 
 
 def get_peak_with_search(
-    db: Session, box: schemas.BoxSearch | None,
+    db: Session,
+    box: schemas.BoxSearch | None,
     range_search: schemas.RangeSearch | None
 ) -> list[schemas.Peak]:
     """
@@ -67,7 +51,7 @@ def get_peak_with_search(
             )
         ).all()
 
-        return [_custom_encode_peak(q) for q in query]
+        return [q for q in query]
 
     elif range_search:
         query = db.query(
@@ -80,12 +64,50 @@ def get_peak_with_search(
             ) <= range_search.range_in_meters
         ).all()
 
-        return [_custom_encode_peak(q) for q in query]
+        return [q for q in query]
 
 
 def create_peak(db: Session, peak: schemas.Peak) -> schemas.Peak:
+    """
+    Insert a peak in the database.
+
+    :param db: SQLAlchemy session object
+    :return: The created peak
+    """
     db_peak = models.Peak(name=peak.name, geom=f'POINT({peak.lat} {peak.lon})')
     db.add(db_peak)
     db.commit()
     db.refresh(db_peak)
-    return _custom_encode_peak(db_peak)
+    return db_peak
+
+
+def update_peak(
+    db: Session,
+    db_peak: schemas.Peak,
+    peak_update: schemas.PeakUpdate
+) -> schemas.Peak:
+    """
+    Update a peak in the database.
+
+    :param db_peak: A Peak schema
+    :param db: SQLAlchemy session object
+    :return: The updated peak
+    """
+    db_peak.name = peak_update.name
+    db_peak.geom = f'POINT({peak_update.lat} {peak_update.lon})'
+
+    db.commit()
+    db.refresh(db_peak)
+    return db_peak
+
+
+def delete_peak(db: Session, peak_id: int):
+    """
+    Delete a peak in the database.
+
+    :param peak_id: A Peak schema
+    :param db: SQLAlchemy session object
+    """
+    db_peak = get_peak(db, peak_id)
+    db.delete(db_peak)
+    db.commit()

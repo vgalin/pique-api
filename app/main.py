@@ -1,5 +1,9 @@
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+
+from geoalchemy2.elements import WKBElement
+from shapely import wkb
 
 from .database import SessionLocal, engine
 from . import crud, models, schemas, config
@@ -20,17 +24,31 @@ def get_db():
         db.close()
 
 
+# WKB* objects must be encoded to be to JSON-serializable
+def encode_peak(peak: models.Peak):
+    return jsonable_encoder(
+        peak,
+        custom_encoder={WKBElement: lambda x: str(wkb.loads(str(x)))}
+    )
+
+
 @app.get('/')
 def read_root():
     return "Welcome to Pique API."
 
 
-@app.get('/peaks/{peak_id}', response_model=schemas.Peak | schemas.Peak)
+@app.get('/peaks/{peak_id}', response_model=schemas.Peak)
 def read_peak(
-    peak_id: int | None,
+    peak_id: int,
     db: Session = Depends(get_db),
 ):
-    return crud.get_peak(db=db, peak_id=peak_id)
+    db_peak = crud.get_peak(db=db, peak_id=peak_id)
+    if not db_peak:
+        raise HTTPException(
+            status_code=404,
+            detail='Peak with given id not found.'
+        )
+    return encode_peak(db_peak)
 
 
 @app.get('/peaks/', response_model=schemas.Peak | list[schemas.Peak])
@@ -78,16 +96,45 @@ def search_peak(
             detail='Missing query parameters for Box Search or Range Search.'
         )
 
-    return crud.get_peak_with_search(db=db, box=box, range_search=range_search)
+    search_results = crud.get_peak_with_search(
+        db=db, box=box, range_search=range_search
+    )
+    return [encode_peak(result) for result in search_results]
 
 
 @app.post('/peaks/', response_model=schemas.Peak)
 def create_peak(peak: schemas.PeakCreate, db: Session = Depends(get_db)):
-    # If TWO peaks cannot have the same name, do something like this:
-    # db_peak = crud.get_peak(db, value=peak.name, group=peak.group)
-    # if db_peak:
-    #     raise HTTPException(
-    #         status_code=400,
-    #         detail='peak already registered'
-    #     )
-    return crud.create_peak(db=db, peak=peak)
+    return encode_peak(
+        crud.create_peak(db=db, peak=peak)
+    )
+
+
+@app.put('/peaks/{peak_id}', response_model=schemas.Peak)
+def update_peak(
+    peak_id: int,
+    peak_update: schemas.PeakUpdate,
+    db: Session = Depends(get_db)
+):
+    db_peak = crud.get_peak(db=db, peak_id=peak_id)
+    if not db_peak:
+        raise HTTPException(
+            status_code=404,
+            detail='Peak with given id not found.'
+        )
+    return encode_peak(
+        crud.update_peak(db=db, db_peak=db_peak, peak_update=peak_update)
+    )
+
+
+@app.delete('/peaks/{peak_id}', response_model=schemas.Peak)
+def delete_peak(peak_id: int, db: Session = Depends(get_db)):
+    db_peak = crud.get_peak(db=db, peak_id=peak_id)
+    if not db_peak:
+        raise HTTPException(
+            status_code=404,
+            detail='Peak with given id not found.'
+        )
+    crud.delete_peak(db, peak_id)
+    return encode_peak(
+        db_peak
+    )
