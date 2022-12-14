@@ -39,7 +39,9 @@ The API will then be available at `http://localhost:80`.
 - `GET /peaks/`: Search for peaks within a specified box or range.
 - `POST /peaks/`: Create a new peak.
 
-### Query parameters
+When the API is running, documentation is available at `http://localhost/docs`
+
+### `GET /peaks/` Query parameters
 
 The `/peaks/` endpoint supports the following query parameters for searching peaks within a box:
 
@@ -56,6 +58,14 @@ Alternatively, the following query parameters can be used to search for peaks wi
 
 ## Known issues
 - After `docker-compose up`, the API cannot reach the DB. Workaround: CTRL-C / SIGINT docker compose and re run it.
+
+## Going further
+- Different configuration for dev/prod
+- Better way to query using `GET /peaks/`
+- Homogenize in/out format? (lat/long integers in input VS WKT in output)
+- Github actions
+- Simple non regression-testing using Pytest + `requests` module
+- Add an `elevation` attribute to mountain peaks
 
 ## License
 
