@@ -41,7 +41,7 @@ The API will then be available at `http://localhost:80`.
 - `PUT /peaks/`: Update a  peak.
 - `DELETE /peaks/`: Delete a peak.
 
-When the API is running, its full documentation is available at `http://localhost/docs` or `http://localhost/redoc`
+When the API is running, its full documentation is available at `http://localhost/docs` or `http://localhost/redoc`.
 
 ### `GET /peaks/` Query parameters
 
