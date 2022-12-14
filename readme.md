@@ -12,6 +12,7 @@
 
 ## Prerequisites
 - Docker
+- Python (for testing only)
 
 ## Installation
 
