@@ -74,7 +74,11 @@ def create_peak(db: Session, peak: schemas.Peak) -> schemas.Peak:
     :param db: SQLAlchemy session object
     :return: The created peak
     """
-    db_peak = models.Peak(name=peak.name, geom=f'POINT({peak.lat} {peak.lon})')
+    db_peak = models.Peak(
+        name=peak.name,
+        geom=f'POINT({peak.lat} {peak.lon})',
+        elevation=peak.elevation,
+    )
     db.add(db_peak)
     db.commit()
     db.refresh(db_peak)
@@ -95,6 +99,7 @@ def update_peak(
     """
     db_peak.name = peak_update.name
     db_peak.geom = f'POINT({peak_update.lat} {peak_update.lon})'
+    db_peak.elevation = peak_update.elevation
 
     db.commit()
     db.refresh(db_peak)

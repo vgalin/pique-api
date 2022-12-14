@@ -1,31 +1,31 @@
 from pydantic import BaseModel
 
 
-class PeakCreate(BaseModel):
-    name: str | None
-    lat: float
-    lon: float
-
-
 class Peak(BaseModel):
     id: int
     name: str
-    # lat: float
-    # lon: float
     geom: str
-    # TODO 'elevation' attribute would be nice
+    elevation: int
 
     class Config:
         orm_mode = True
+
+
+class PeakCreate(BaseModel):
+    name: str | None = None
+    lat: float
+    lon: float
+    elevation: int | None = None
 
 
 class PeakUpdate(BaseModel):
     name: str | None = None
     lat: float | None = None
     lon: float | None = None
+    elevation: int | None = None
 
 
-# as-is, the following should not be in this peculiar file
+# as-is, the following should not be the current file
 class BoxSearch(BaseModel):
     lon_min: float  # xmin
     lat_min: float  # ymin

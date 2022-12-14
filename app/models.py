@@ -10,3 +10,4 @@ class Peak(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     geom = Column(Geometry('POINT'))
+    elevation = Column(Integer)

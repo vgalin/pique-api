@@ -5,6 +5,7 @@ everest = {
     'name': 'Mt. Everest',
     'lat': 27.986065,
     'lon': 86.922623,
+    'elevation': 8849,
 }
 
 k2 = {
@@ -12,17 +13,19 @@ k2 = {
     'name': 'K2',
     'lat': 35.880981,
     'lon': 76.508102,
+    'elevation': 8611,
 }
 
-kang = {
+kangchenjunga = {
     'id': 3,
     'name': 'Kangchenjunga',
     'lat': 27.702414,
     'lon': 88.147881,
+    'elevation': 8586
 }
 
 BASE_URL = 'http://127.0.0.1'
-peaks = [everest, k2, kang]
+peaks = [everest, k2, kangchenjunga]
 
 # docker-compose down --volumes
 
@@ -37,13 +40,16 @@ def test_post_peak():
     for peak in peaks:
         response = requests.post(
             f'{BASE_URL}/peaks/',
-            json=dict(name=peak['name'], lat=peak['lat'], lon=peak['lon'])
+            json=dict(
+                name=peak['name'], elevation=peak['elevation'],
+                lat=peak['lat'], lon=peak['lon'])
         )
 
         assert response.status_code == 200
         assert response.json()['id'] == peak['id']
         assert response.json()['name'] == peak['name']
         assert response.json()['geom'] == f'POINT ({peak["lat"]} {peak["lon"]})'
+        assert response.json()['elevation'] == peak['elevation']
 
 
 def test_read_peak():
@@ -53,6 +59,7 @@ def test_read_peak():
         assert response.json()['id'] == peak['id']
         assert response.json()['name'] == peak['name']
         assert response.json()['geom'] == f'POINT ({peak["lat"]} {peak["lon"]})'
+        assert response.json()['elevation'] == peak['elevation']
 
 
 def test_search_peak_with_box_parameters_all_peaks():
@@ -75,6 +82,7 @@ def test_search_peak_with_box_parameters_only_two_peaks():
         assert item['id'] == peak['id']
         assert item['name'] == peak['name']
         assert item['geom'] == f'POINT ({peak["lat"]} {peak["lon"]})'
+        assert item['elevation'] == peak['elevation']
 
 
 def test_search_peak_with_range_parameters_all_peaks():
@@ -86,6 +94,7 @@ def test_search_peak_with_range_parameters_all_peaks():
         assert item['id'] == peak['id']
         assert item['name'] == peak['name']
         assert item['geom'] == f'POINT ({peak["lat"]} {peak["lon"]})'
+        assert item['elevation'] == peak['elevation']
 
 
 # TODO more advanced searches
@@ -95,7 +104,10 @@ def test_update_name():
     peak = peaks[0]
     response = requests.put(
         f'{BASE_URL}/peaks/{peak["id"]}',
-        json=dict(name=peak['name'] + '-UPD', lat=peak['lat'], lon=peak['lon'])
+        json=dict(
+            name=peak['name'] + '-UPD', elevation=peak['elevation'],
+            lat=peak['lat'], lon=peak['lon'],
+        )
     )
     assert response.status_code == 200
     assert response.json()['name'] == peak['name'] + '-UPD'
