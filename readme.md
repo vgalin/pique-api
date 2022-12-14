@@ -38,33 +38,46 @@ The API will then be available at `http://localhost:80`.
 - `GET /peaks/{peak_id}`: Retrieve peak with specified ID.
 - `GET /peaks/`: Search for peaks within a specified box or range.
 - `POST /peaks/`: Create a new peak.
+- `PUT /peaks/`: Update a  peak.
+- `DELETE /peaks/`: Delete a peak.
 
-When the API is running, documentation is available at `http://localhost/docs`
+When the API is running, its full documentation is available at `http://localhost/docs` or `http://localhost/redoc`
 
 ### `GET /peaks/` Query parameters
 
-The `/peaks/` endpoint supports the following query parameters for searching peaks within a box:
+As `GET /peaks/` is the only non trivial endpoint, here is a quick explanation of its parameters.
 
+The `/peaks/` endpoint supports the following query parameters for searching peaks within a box:
 - `lon_min`: The minimum longitude of the box.
 - `lat_min`: The minimum latitude of the box.
 - `lon_max`: The maximum longitude of the box.
 - `lat_max`: The maximum latitude of the box.
 
 Alternatively, the following query parameters can be used to search for peaks within a specified range:
-
 - `range_in_meters`: The range to search within, in meters.
 - `lat`: The latitude of the center of the range.
 - `lon`: The longitude of the center of the range.
 
-## Known issues
-- After `docker-compose up`, the API cannot reach the DB. Workaround: CTRL-C / SIGINT docker compose and re run it.
+## Testing
+Tests are run from the local machine.
+
+Install the Python packages required for testing:
+```shell
+python -m pip install -r requirements-tests.txt
+```
+
+Run the tests (while being at the root directory of this repository):
+```
+python -m pytest
+```
 
 ## Going further
+
 - Different configuration for dev/prod
 - Better way to query using `GET /peaks/`
 - Homogenize in/out format? (lat/long integers in input VS WKT in output)
 - Github actions
-- Simple non regression-testing using Pytest + `requests` module
+- Extend existing tests
 - Add an `elevation` attribute to mountain peaks
 
 ## License
