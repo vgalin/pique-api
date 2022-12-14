@@ -5,3 +5,4 @@ SQLAlchemy
 psycopg2 # sqlalchemy dependency
 geoalchemy2
 shapely
+requests
