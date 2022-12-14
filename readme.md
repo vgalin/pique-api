@@ -67,7 +67,7 @@ python -m pip install -r requirements-tests.txt
 ```
 
 Run the tests (while being at the root directory of this repository):
-```
+```shell
 python -m pytest
 ```
 
