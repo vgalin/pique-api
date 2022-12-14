@@ -78,7 +78,6 @@ python -m pytest
 - Homogenize in/out format? (lat/long integers in input VS WKT in output)
 - Github actions
 - Extend existing tests
-- Add an `elevation` attribute to mountain peaks
 
 ## License
 
